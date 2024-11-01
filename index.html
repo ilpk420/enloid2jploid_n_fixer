@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VSQX Phoneme Replacer</title>
+</head>
+<body>
+    <h1>VSQX Phoneme Replacer</h1>
+    <input type="file" id="file_input" accept=".vsqx">
+    <button id="process_button">Process and Download</button>
+    <script>
+        document.getElementById('process_button').addEventListener('click', () => {
+            const file_input = document.getElementById('file_input');
+            if (!file_input.files.length) {
+                alert("Please select a VSQX file to process.");
+                return;
+            }
+
+            const file = file_input.files[0];
+            const original_file_name = file.name.replace(".vsqx", "");
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                let xml_text = event.target.result;
+
+                xml_text = xml_text.replace(/<p><!\[CDATA\[(.*?)\]\]><\/p>/g, (match, cdata_content) => {
+                    const modified_content = cdata_content.replace(/u:/g, 'n');
+                    return `<p><![CDATA[${modified_content}]]></p>`;
+                });
+
+                const blob = new Blob([xml_text], { type: "application/xml" });
+                const download_link = document.createElement("a");
+                download_link.href = URL.createObjectURL(blob);
+                download_link.download = `${original_file_name}_Enloid2JploidFixer.vsqx`;
+                download_link.click();
+            };
+
+            reader.readAsText(file);
+        });
+    </script>
+</body>
+</html>
